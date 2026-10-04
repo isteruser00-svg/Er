@@ -1,159 +1,382 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Magical Particle Heart</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background-color: #000;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    canvas {
-      display: block;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Özür Dilerim ❤️</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#030305;
+  font-family:Arial,sans-serif;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  touch-action:manipulation;
+}
+
+#text{
+  position:fixed;
+  left:50%;
+  top:76%;
+  transform:translate(-50%,-50%);
+  width:90%;
+  text-align:center;
+  color:white;
+  opacity:0;
+  transition:opacity 1.8s ease;
+  pointer-events:none;
+}
+
+#text h1{
+  font-size:clamp(32px,9vw,62px);
+  text-shadow:
+    0 0 8px #ff4268,
+    0 0 25px #ff174d,
+    0 0 50px rgba(255,23,77,.5);
+}
+
+#text p{
+  margin-top:14px;
+  font-size:clamp(17px,4.5vw,26px);
+  color:#eee;
+}
+
+#hint{
+  position:fixed;
+  bottom:7%;
+  left:50%;
+  transform:translateX(-50%);
+  color:rgba(255,255,255,.55);
+  font-size:15px;
+  transition:opacity 1s;
+}
+</style>
 </head>
+
 <body>
 
 <canvas id="canvas"></canvas>
 
+<div id="text">
+  <h1>Özür dilerim ❤️</h1>
+  <p>Seni kırmak istememiştim.</p>
+</div>
+
+<div id="hint">Kalbe dokun...</div>
+
 <script>
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
 
-  let width = (canvas.width = window.innerWidth);
-  let height = (canvas.height = window.innerHeight);
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-  window.addEventListener("resize", () => {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-  });
+let W,H;
+let started=false;
+let amount=0;
 
-  // Görselde tanımlanan mavi renk tonları
-  const BLUE_SHADES = [
-    "#3b82f6", "#60a5fa", // blue-400
-    "#93c5fd", "#2563eb", // blue-600
-    "#bfdbfe", "#1d4ed8"  // blue-700
-  ];
+function resize(){
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
+}
 
-  class Particle {
-    constructor(x, y, type) {
-      this.type = type;
-      this.color = BLUE_SHADES[Math.floor(Math.random() * BLUE_SHADES.length)];
-      this.maxLife = type === "float" ? 200 + Math.random() * 100 : 80 + Math.random() * 40;
-      this.life = this.maxLife;
+addEventListener("resize",resize);
+resize();
 
-      if (type === "float") {
-        this.x = x;
-        this.y = y;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = -Math.random() * 0.8 - 0.2;
-        this.size = Math.random() * 2 + 1;
-      } else if (type === "burst") {
-        // Kalp formülü (Heart parametric equation)
-        const t = Math.random() * Math.PI * 2;
-        const heartX = 16 * Math.pow(Math.sin(t), 3);
-        const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-        
-        const speed = Math.random() * 0.8 + 0.2;
-        this.x = x;
-        this.y = y;
-        this.vx = heartX * 0.4 * speed + (Math.random() - 0.5) * 0.5;
-        this.vy = heartY * 0.4 * speed + (Math.random() - 0.5) * 0.5;
-        this.size = Math.random() * 3 + 1.5;
-      }
-    }
 
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.life--;
+/* GERÇEK DOLU KALP */
 
-      if (this.type === "float" && this.life <= 0) {
-        this.x = Math.random() * width;
-        this.y = height + 10;
-        this.life = this.maxLife;
-      }
-    }
+function heartPath(x,y,s){
 
-    draw() {
-      const alpha = Math.max(0, this.life / this.maxLife);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = this.color;
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
+  ctx.beginPath();
 
-  // Görseldeki değişkenler ve döngüler
-  const floatParticles = [];
-  const burstParticles = [];
-  const FLOAT_COUNT = 140;
+  ctx.moveTo(x,y+s*0.85);
 
-  for (let i = 0; i < FLOAT_COUNT; i++) {
-    const p = new Particle(
-      Math.random() * width, Math.random() * height, "float"
+  ctx.bezierCurveTo(
+    x-s*1.35,y-s*0.05,
+    x-s*1.25,y-s*1.05,
+    x-s*0.55,y-s*1.05
+  );
+
+  ctx.bezierCurveTo(
+    x-s*0.15,y-s*1.05,
+    x,y-s*0.72,
+    x,y-s*0.42
+  );
+
+  ctx.bezierCurveTo(
+    x,y-s*0.72,
+    x+s*0.15,y-s*1.05,
+    x+s*0.55,y-s*1.05
+  );
+
+  ctx.bezierCurveTo(
+    x+s*1.25,y-s*1.05,
+    x+s*1.35,y-s*0.05,
+    x,y+s*0.85
+  );
+
+  ctx.closePath();
+}
+
+
+/* PARLAK KALP */
+
+function drawHeart(x,y,s,alpha=1){
+
+  ctx.save();
+
+  ctx.globalAlpha=alpha;
+
+  /* dış parlama */
+
+  ctx.shadowColor="#ff174d";
+  ctx.shadowBlur=35;
+
+  const gradient=ctx.createLinearGradient(
+    x-s,
+    y-s,
+    x+s,
+    y+s
+  );
+
+  gradient.addColorStop(0,"#ff416c");
+  gradient.addColorStop(.45,"#ff174d");
+  gradient.addColorStop(1,"#b9003d");
+
+  ctx.fillStyle=gradient;
+
+  heartPath(x,y,s);
+  ctx.fill();
+
+
+  /* üstteki parlaklık */
+
+  ctx.shadowBlur=0;
+
+  const shine=ctx.createRadialGradient(
+    x-s*.35,
+    y-s*.65,
+    2,
+    x,
+    y,
+    s*1.5
+  );
+
+  shine.addColorStop(
+    0,
+    "rgba(255,255,255,.45)"
+  );
+
+  shine.addColorStop(
+    .25,
+    "rgba(255,150,170,.18)"
+  );
+
+  shine.addColorStop(
+    1,
+    "rgba(255,255,255,0)"
+  );
+
+  ctx.fillStyle=shine;
+
+  heartPath(x,y,s);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+
+/* BAŞLANGIÇTA KIRIK KALP */
+
+function drawBroken(){
+
+  const s=Math.min(W,H)*.18;
+
+  const x=W/2;
+  const y=H*.43;
+
+  const gap=(1-amount)*35;
+
+  /*
+    Sol taraf
+  */
+
+  ctx.save();
+
+  ctx.beginPath();
+
+  ctx.rect(
+    0,
+    0,
+    x-gap,
+    H
+  );
+
+  ctx.clip();
+
+  drawHeart(
+    x-gap,
+    y,
+    s,
+    1
+  );
+
+  ctx.restore();
+
+
+  /*
+    Sağ taraf
+  */
+
+  ctx.save();
+
+  ctx.beginPath();
+
+  ctx.rect(
+    x+gap,
+    0,
+    W-x-gap,
+    H
+  );
+
+  ctx.clip();
+
+  drawHeart(
+    x+gap,
+    y,
+    s,
+    1
+  );
+
+  ctx.restore();
+
+
+  /*
+    Kırık hattı
+  */
+
+  if(amount<.85){
+
+    ctx.save();
+
+    ctx.strokeStyle=
+      "rgba(20,0,8,.9)";
+
+    ctx.lineWidth=5;
+    ctx.lineCap="round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(x,y-s*.45);
+
+    ctx.lineTo(
+      x-8,
+      y-s*.05
     );
-    p.life = Math.random() * p.maxLife; // stagger starting life
-    floatParticles.push(p);
-  }
 
-  function spawnHeartBurst(x, y) {
-    const count = 140;
-    for (let i = 0; i < count; i++) {
-      burstParticles.push(new Particle(x, y, "burst"));
+    ctx.lineTo(
+      x+8,
+      y+s*.18
+    );
+
+    ctx.lineTo(
+      x-6,
+      y+s*.45
+    );
+
+    ctx.stroke();
+
+    ctx.restore();
+  }
+}
+
+
+/* ANİMASYON */
+
+function animate(){
+
+  ctx.fillStyle="#030305";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  if(!started){
+
+    drawBroken();
+
+  }else{
+
+    amount+=(1-amount)*.045;
+
+    drawBroken();
+
+    if(amount>.96){
+
+      const pulse=
+        1+
+        Math.sin(Date.now()*.004)*.025;
+
+      const s=
+        Math.min(W,H)*.18;
+
+      drawHeart(
+        W/2,
+        H*.43,
+        s*pulse,
+        1
+      );
     }
   }
 
-  // Otomatik patlama/kalp oluşumu
-  setInterval(() => {
-    spawnHeartBurst(width / 2, height / 2 + 50);
-  }, 1200);
+  requestAnimationFrame(animate);
+}
 
-  // Ekrana tıklandığında da kalp oluşturur
-  window.addEventListener("click", (e) => {
-    spawnHeartBurst(e.clientX, e.clientY);
-  });
+animate();
 
-  function animate() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-    ctx.fillRect(0, 0, width, height);
 
-    floatParticles.forEach((p) => {
-      p.update();
-      p.draw();
-    });
+/* DOKUNUNCA BİRLEŞ */
 
-    for (let i = burstParticles.length - 1; i >= 0; i--) {
-      const p = burstParticles[i];
-      p.update();
-      p.draw();
-      if (p.life <= 0) {
-        burstParticles.splice(i, 1);
-      }
-    }
+canvas.addEventListener(
+  "click",
+  ()=>{
 
-    requestAnimationFrame(animate);
+    if(started)return;
+
+    started=true;
+
+    document.getElementById(
+      "hint"
+    ).style.opacity="0";
+
+    setTimeout(()=>{
+
+      document.getElementById(
+        "text"
+      ).style.opacity="1";
+
+    },2500);
+
   }
+);
 
-  animate();
 </script>
 
 </body>
 </html>
-
